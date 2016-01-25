@@ -1,6 +1,19 @@
 require_relative "../../../common/lib/measurement/measurer"
 require_relative "../../../common/lib/locator/method_locator"
 
+class ParameterCounter <Parser::AST::Processor
+  attr_reader :total
+  
+  def initialize
+    @total = 0
+  end
+	
+  def on_argument(node)
+  	super(node)
+    @total += 1
+  end
+end
+
 module Measurement
   class MethodMeasurer < Measurer
     def locator
@@ -15,11 +28,13 @@ module Measurement
     end
 
     def count_lines_of_code(method)
-      "?"
+      method.source.lines.count
     end
 
     def count_parameters(method)
-      "?"
+      counter = ParameterCounter.new
+      counter.process(method.ast)
+      counter.total
     end
   end
 end

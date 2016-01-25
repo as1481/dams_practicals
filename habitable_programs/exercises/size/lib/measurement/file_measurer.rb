@@ -1,6 +1,32 @@
 require_relative "../../../common/lib/measurement/measurer"
 require_relative "../../../common/lib/locator/file_locator"
 
+class ModuleCounter <Parser::AST::Processor
+  attr_reader :total
+  
+  def initialize
+    @total = 0
+  end
+	
+  def on_module(node)
+  	super(node)
+    @total += 1
+  end
+end
+
+class ClassCounter <Parser::AST::Processor
+  attr_reader :total
+  
+  def initialize
+    @total = 0
+  end
+  
+  def on_class(node)
+  	super(node)
+	@total += 1
+  end
+end
+
 module Measurement
   # A FileMeasurer is a specialisation of Measurement::Measurer
   class FileMeasurer < Measurer
@@ -24,15 +50,19 @@ module Measurement
     end
 
     def count_lines_of_code(file)
-      "?"
+   	  file.source.lines.count
     end
 
-    def count_modules(file)
-      "?"
+   def count_modules(file)            
+      counter = ModuleCounter.new
+      counter.process(file.ast)
+      counter.total
     end
 
     def count_classes(file)
-      "?"
+      counter = ClassCounter.new
+      counter.process(file.ast)
+      counter.total
     end
   end
 end
